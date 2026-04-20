@@ -1217,90 +1217,69 @@ Cosa hai fatto: ${testoLavoro}`;
     }
 
     function renderStorico() {
-  aggiornaBottoniFiltro();
+      aggiornaBottoniFiltro();
 
-  const lavoriFiltrati = raccogliLavori();
+      const lavoriFiltrati = raccogliLavori();
 
-  if (lavoriFiltrati.length === 0) {
-    storicoLavori.innerHTML = '<div class="empty">Nessun lavoro trovato</div>';
-    return;
-  }
+      if (lavoriFiltrati.length === 0) {
+        storicoLavori.innerHTML = '<div class="empty">Nessun lavoro trovato</div>';
+        return;
+      }
 
-  let html = '';
+      let html = '';
 
-  lavoriFiltrati.forEach(lavoro => {
-    html += `
-      <div class="storico-item">
-        <div class="storico-top">
-          <div>
-            <div><strong>${formattaData(lavoro.data)}</strong></div>
-            <div class="small" style="margin-top:4px;"><strong>Ore:</strong> ${escapeHtml(lavoro.ore || '0')}</div>
-            <div style="margin-top:6px;">${escapeHtml(lavoro.descrizione)}</div>
-            <div class="small" style="margin-top:6px;">${escapeHtml(lavoro.cliente)} - ${escapeHtml(lavoro.modello)}</div>
+      lavoriFiltrati.forEach(lavoro => {
+        html += `
+          <div class="storico-item">
+            <div class="storico-top">
+              <div>
+                <div><strong>${formattaData(lavoro.data)}</strong></div>
+                <div class="small" style="margin-top:4px;"><strong>Ore:</strong> ${escapeHtml(lavoro.ore || '0')}</div>
+                <div style="margin-top:6px;">${escapeHtml(lavoro.descrizione)}</div>
+                <div class="small" style="margin-top:6px;">${escapeHtml(lavoro.cliente)} - ${escapeHtml(lavoro.modello)}</div>
 
-            <div style="margin-top:10px; display:flex; gap:18px; flex-wrap:wrap; align-items:center;">
-              <label style="display:flex; align-items:center; gap:8px; margin:0; font-weight:600;">
-                <input
-                  type="checkbox"
-                  ${lavoro.fatturato ? 'checked' : ''}
-                  data-id="${lavoro.id || ''}"
-                  data-macchina-id="${lavoro.macchinaId}"
-                  data-campo="fatturato"
-                  class="toggle-storico"
-                  style="width:18px; height:18px;"
-                />
-                <span>Fatturato</span>
-              </label>
+                <div style="margin-top:10px; display:flex; gap:18px; flex-wrap:wrap; align-items:center;">
+                  <label style="display:flex; align-items:center; gap:8px; margin:0; font-weight:600;">
+                    <input
+                      type="checkbox"
+                      ${lavoro.fatturato ? 'checked' : ''}
+                      data-id="${lavoro.id || ''}"
+                      data-macchina-id="${lavoro.macchinaId}"
+                      data-campo="fatturato"
+                      class="toggle-storico"
+                      style="width:18px; height:18px;"
+                    />
+                    <span>Fatturato</span>
+                  </label>
 
-              <label style="display:flex; align-items:center; gap:8px; margin:0; font-weight:600;">
-                <input
-                  type="checkbox"
-                  ${lavoro.pagato ? 'checked' : ''}
-                  data-id="${lavoro.id || ''}"
-                  data-macchina-id="${lavoro.macchinaId}"
-                  data-campo="pagato"
-                  class="toggle-storico"
-                  style="width:18px; height:18px;"
-                />
-                <span>Pagato</span>
-              </label>
-            </div>
+                  <label style="display:flex; align-items:center; gap:8px; margin:0; font-weight:600;">
+                    <input
+                      type="checkbox"
+                      ${lavoro.pagato ? 'checked' : ''}
+                      data-id="${lavoro.id || ''}"
+                      data-macchina-id="${lavoro.macchinaId}"
+                      data-campo="pagato"
+                      class="toggle-storico"
+                      style="width:18px; height:18px;"
+                    />
+                    <span>Pagato</span>
+                  </label>
+                </div>
 
-            <div>
-              <span class="badge ${lavoro.fatturato ? 'ok' : 'no'}">${lavoro.fatturato ? 'Fatturato: Sì' : 'Fatturato: No'}</span>
-              <span class="badge ${lavoro.pagato ? 'ok' : 'no'}">${lavoro.pagato ? 'Pagato: Sì' : 'Pagato: No'}</span>
+                <div>
+                  <span class="badge ${lavoro.fatturato ? 'ok' : 'no'}">${lavoro.fatturato ? 'Fatturato: Sì' : 'Fatturato: No'}</span>
+                  <span class="badge ${lavoro.pagato ? 'ok' : 'no'}">${lavoro.pagato ? 'Pagato: Sì' : 'Pagato: No'}</span>
+                </div>
+              </div>
+
+              <div class="storico-buttons">
+                <button class="mini-btn btn-gray lavoro-modifica" data-id="${lavoro.id || ''}" data-macchina-id="${lavoro.macchinaId}">Modifica</button>
+                <button class="mini-btn btn-red lavoro-elimina" data-id="${lavoro.id || ''}" data-macchina-id="${lavoro.macchinaId}">Elimina</button>
+              </div>
             </div>
           </div>
-
-          <div class="storico-buttons">
-            <button class="mini-btn btn-gray lavoro-modifica" data-id="${lavoro.id || ''}" data-macchina-id="${lavoro.macchinaId}">Modifica</button>
-            <button class="mini-btn btn-red lavoro-elimina" data-id="${lavoro.id || ''}" data-macchina-id="${lavoro.macchinaId}">Elimina</button>
-          </div>
-        </div>
-      </div>
-    `;
-  });
-
-  storicoLavori.innerHTML = html;
-
-  storicoLavori.querySelectorAll('.toggle-storico').forEach(el => {
-    el.addEventListener('change', async () => {
-      await toggleStatoLavoro(el.dataset.macchinaId, el.dataset.id, el.dataset.campo, el.checked);
-    });
-  });
-
-  storicoLavori.querySelectorAll('.lavoro-modifica').forEach(el => {
-    el.addEventListener('click', () => {
-      modificaLavoro(el.dataset.macchinaId, el.dataset.id);
-    });
-  });
-
-  storicoLavori.querySelectorAll('.lavoro-elimina').forEach(el => {
-    el.addEventListener('click', async () => {
-      await eliminaLavoro(el.dataset.macchinaId, el.dataset.id);
-    });
-  });
-}
+        `;
+      });
 
       storicoLavori.innerHTML = html;
 
@@ -1347,76 +1326,76 @@ Cosa hai fatto: ${testoLavoro}`;
     }
 
     function modificaLavoro(macchinaId, idLavoro) {
-  const macchina = archivio.find(item => String(item.id) === String(macchinaId));
-  if (!macchina) return;
+      const macchina = archivio.find(item => String(item.id) === String(macchinaId));
+      if (!macchina) return;
 
-  const lavoro = (macchina.lavori || []).find(item => String(item.id) === String(idLavoro));
-  if (!lavoro) {
-    alert('Lavoro non trovato');
-    return;
-  }
+      const lavoro = (macchina.lavori || []).find(item => String(item.id) === String(idLavoro));
+      if (!lavoro) {
+        alert('Lavoro non trovato');
+        return;
+      }
 
-  macchinaSelezionataId = macchinaId;
-  clienteSelezionatoPerEliminazione = macchina.ragioneSociale;
-  lavoroInModificaId = idLavoro;
-  dataLavoro.value = lavoro.data || '';
-  oreLavoro.value = lavoro.ore || '';
+      macchinaSelezionataId = macchinaId;
+      clienteSelezionatoPerEliminazione = macchina.ragioneSociale;
+      lavoroInModificaId = idLavoro;
+      dataLavoro.value = lavoro.data || '';
+      oreLavoro.value = lavoro.ore || '';
 
-  const datiDescrizione = leggiDescrizioneSalvata(lavoro.descrizione);
-  sceltaRicambi = datiDescrizione.ricambiScelta;
-  dettaglioRicambi.value = datiDescrizione.dettaglioRicambi;
-  descrizioneLavoro.value = datiDescrizione.descrizione;
+      const datiDescrizione = leggiDescrizioneSalvata(lavoro.descrizione);
+      sceltaRicambi = datiDescrizione.ricambiScelta;
+      dettaglioRicambi.value = datiDescrizione.dettaglioRicambi;
+      descrizioneLavoro.value = datiDescrizione.descrizione;
 
-  aggiornaStepLavoro();
-  fatturatoLavoro.checked = Boolean(lavoro.fatturato);
-  pagatoLavoro.checked = Boolean(lavoro.pagato);
-  salvaLavoroBtn.textContent = 'Aggiorna lavoro';
-} 
+      aggiornaStepLavoro();
+      fatturatoLavoro.checked = Boolean(lavoro.fatturato);
+      pagatoLavoro.checked = Boolean(lavoro.pagato);
+      salvaLavoroBtn.textContent = 'Aggiorna lavoro';
+    }
 
     async function eliminaLavoro(macchinaId, idLavoro) {
-  const macchina = archivio.find(item => String(item.id) === String(macchinaId));
-  if (!macchina) {
-    alert('Macchina non trovata');
-    return;
-  }
+      const macchina = archivio.find(item => String(item.id) === String(macchinaId));
+      if (!macchina) {
+        alert('Macchina non trovata');
+        return;
+      }
 
-  const conferma = confirm('Vuoi eliminare questo lavoro?');
-  if (!conferma) return;
+      const conferma = confirm('Vuoi eliminare questo lavoro?');
+      if (!conferma) return;
 
-  try {
-    const lavoriOriginali = Array.isArray(macchina.lavori) ? [...macchina.lavori] : [];
-    const lavoriAggiornati = lavoriOriginali.filter(item => String(item.id) !== String(idLavoro));
+      try {
+        const lavoriOriginali = Array.isArray(macchina.lavori) ? [...macchina.lavori] : [];
+        const lavoriAggiornati = lavoriOriginali.filter(item => String(item.id) !== String(idLavoro));
 
-    if (lavoriAggiornati.length === lavoriOriginali.length) {
-      alert('Non sono riuscito a trovare il lavoro da eliminare.');
-      return;
+        if (lavoriAggiornati.length === lavoriOriginali.length) {
+          alert('Non sono riuscito a trovare il lavoro da eliminare.');
+          return;
+        }
+
+        await salvaMacchinaFirestore(macchina.id, { lavori: lavoriAggiornati });
+
+        if (String(lavoroInModificaId) === String(idLavoro)) {
+          pulisciFormLavoro();
+        }
+
+        alert('Lavoro eliminato correttamente');
+      } catch (error) {
+        console.error(error);
+        alert('Errore durante l’eliminazione del lavoro');
+      }
     }
-
-    await salvaMacchinaFirestore(macchina.id, { lavori: lavoriAggiornati });
-
-    if (String(lavoroInModificaId) === String(idLavoro)) {
-      pulisciFormLavoro();
-    }
-
-    alert('Lavoro eliminato correttamente');
-  } catch (error) {
-    console.error(error);
-    alert('Errore durante l’eliminazione del lavoro');
-  }
-}
 
     async function toggleStatoLavoro(macchinaId, idLavoro, campo, valore) {
-  const macchina = archivio.find(item => String(item.id) === String(macchinaId));
-  if (!macchina) return;
+      const macchina = archivio.find(item => String(item.id) === String(macchinaId));
+      if (!macchina) return;
 
-  const lavoriAggiornati = (macchina.lavori || []).map(item =>
-    String(item.id) === String(idLavoro)
-      ? { ...item, [campo]: valore }
-      : item
-  );
+      const lavoriAggiornati = (macchina.lavori || []).map(item =>
+        String(item.id) === String(idLavoro)
+          ? { ...item, [campo]: valore }
+          : item
+      );
 
-  await salvaMacchinaFirestore(macchina.id, { lavori: lavoriAggiornati });
-}
+      await salvaMacchinaFirestore(macchina.id, { lavori: lavoriAggiornati });
+    }
 
     function apriModalEliminaCliente() {
       if (!clienteSelezionatoPerEliminazione) {
@@ -1733,28 +1712,28 @@ Cosa hai fatto: ${testoLavoro}`;
       let lavoriAggiornati = Array.isArray(macchina.lavori) ? [...macchina.lavori] : [];
 
       if (lavoroInModificaId) {
-  lavoriAggiornati = lavoriAggiornati.map(item =>
-    String(item.id) === String(lavoroInModificaId)
-      ? {
-          ...item,
+        lavoriAggiornati = lavoriAggiornati.map(item =>
+          String(item.id) === String(lavoroInModificaId)
+            ? {
+                ...item,
+                data,
+                ore,
+                descrizione,
+                fatturato: fatturatoLavoro.checked,
+                pagato: pagatoLavoro.checked
+              }
+            : item
+        );
+      } else {
+        lavoriAggiornati.push({
+          id: String(Date.now() + Math.floor(Math.random() * 1000)),
           data,
           ore,
           descrizione,
           fatturato: fatturatoLavoro.checked,
           pagato: pagatoLavoro.checked
-        }
-      : item
-  );
-} else {
-  lavoriAggiornati.push({
-    id: String(Date.now() + Math.floor(Math.random() * 1000)),
-    data,
-    ore,
-    descrizione,
-    fatturato: fatturatoLavoro.checked,
-    pagato: pagatoLavoro.checked
-  });
-}
+        });
+      }
 
       await salvaMacchinaFirestore(macchina.id, { lavori: lavoriAggiornati });
       pulisciFormLavoro();
