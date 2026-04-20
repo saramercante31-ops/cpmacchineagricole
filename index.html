@@ -1516,22 +1516,48 @@ Cosa hai fatto: ${testoLavoro}`;
     }
 
     loginBtn.addEventListener('click', async function() {
-      const email = loginEmail.value.trim();
-      const password = loginPassword.value;
+  const email = loginEmail.value.trim();
+  const password = loginPassword.value;
 
-      if (!email || !password) {
-        mostraLoginErrore('Inserisci email e password');
-        return;
-      }
+  if (!email || !password) {
+    mostraLoginErrore('Inserisci email e password');
+    return;
+  }
 
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        mostraLoginSuccesso('Accesso effettuato');
-      } catch (error) {
-        console.error(error);
-        mostraLoginErrore('Email o password non corretti');
-      }
-    });
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    mostraLoginSuccesso('Accesso effettuato');
+  } catch (error) {
+    console.error(error);
+
+    let messaggio = '';
+
+    switch (error.code) {
+      case 'auth/invalid-credential':
+      case 'auth/wrong-password':
+      case 'auth/user-not-found':
+        messaggio = 'Email o password non corretti';
+        break;
+
+      case 'auth/unauthorized-domain':
+        messaggio = '⚠️ Dominio NON autorizzato su Firebase (problema anteprima)';
+        break;
+
+      case 'auth/network-request-failed':
+        messaggio = '⚠️ Problema di connessione internet';
+        break;
+
+      case 'auth/too-many-requests':
+        messaggio = '⚠️ Troppi tentativi, riprova più tardi';
+        break;
+
+      default:
+        messaggio = 'Errore reale: ' + error.code;
+    }
+
+    mostraLoginErrore(messaggio);
+  }
+});
 
     logoutBtn.addEventListener('click', async function() {
       await signOut(auth);
