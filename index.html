@@ -427,6 +427,42 @@
       min-width: 120px;
     }
 
+    .scelta-ricambi {
+      display: flex;
+      gap: 10px;
+      margin-top: 2px;
+    }
+
+    .box-scelta {
+      flex: 1;
+      padding: 14px;
+      text-align: center;
+      border-radius: 12px;
+      border: 2px solid #d1d5db;
+      cursor: pointer;
+      font-weight: 700;
+      transition: .2s;
+      background: #fff;
+      user-select: none;
+    }
+
+    .box-scelta:hover {
+      border-color: #111827;
+      transform: translateY(-1px);
+    }
+
+    .box-scelta.attivo {
+      background: #111827;
+      color: #fff;
+      border-color: #111827;
+    }
+
+    .box-scelta.disabilitato {
+      opacity: .55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
     @media (max-width: 1024px) {
       .stats-grid {
         grid-template-columns: 1fr;
@@ -577,15 +613,9 @@
 
         <div>
           <label>Ricambi usati o da ordinare?</label>
-          <div class="toggle-group" id="ricambiStepBox">
-            <div class="check-row">
-              <input type="radio" name="ricambiScelta" id="ricambiSi" value="si" />
-              <span>Sì</span>
-            </div>
-            <div class="check-row">
-              <input type="radio" name="ricambiScelta" id="ricambiNo" value="no" />
-              <span>No</span>
-            </div>
+          <div class="scelta-ricambi" id="sceltaRicambiBox">
+            <div class="box-scelta disabilitato" id="boxRicambiSi" data-valore="si">SÌ</div>
+            <div class="box-scelta disabilitato" id="boxRicambiNo" data-valore="no">NO</div>
           </div>
 
           <div id="boxDettaglioRicambi" class="hidden" style="margin-top:12px;">
@@ -721,8 +751,8 @@
     const resetVistaBtn = document.getElementById('resetVistaBtn');
     const eliminaClienteBtn = document.getElementById('eliminaClienteBtn');
     const dataLavoro = document.getElementById('dataLavoro');
-    const ricambiSi = document.getElementById('ricambiSi');
-    const ricambiNo = document.getElementById('ricambiNo');
+    const boxRicambiSi = document.getElementById('boxRicambiSi');
+    const boxRicambiNo = document.getElementById('boxRicambiNo');
     const dettaglioRicambi = document.getElementById('dettaglioRicambi');
     const boxDettaglioRicambi = document.getElementById('boxDettaglioRicambi');
     const boxDescrizioneLavoro = document.getElementById('boxDescrizioneLavoro');
@@ -759,6 +789,7 @@
     let unsubscribeMacchine = null;
     let clienteEsistenteSelezionato = '';
     let clienteSelezionatoPerEliminazione = '';
+    let sceltaRicambi = '';
 
     function mostraLoginErrore(testo) {
       loginMessage.innerHTML = `<div class="error-box">${testo}</div>`;
@@ -899,42 +930,55 @@
 
     function aggiornaStepLavoro() {
       const dataPresente = !!dataLavoro.value;
-      const sceltaRicambi = ricambiSi.checked ? 'si' : ricambiNo.checked ? 'no' : '';
 
-      ricambiSi.disabled = !dataPresente;
-      ricambiNo.disabled = !dataPresente;
+      [boxRicambiSi, boxRicambiNo].forEach(box => {
+        box.classList.toggle('disabilitato', !dataPresente);
+      });
 
       if (!dataPresente) {
-        ricambiSi.checked = false;
-        ricambiNo.checked = false;
+        sceltaRicambi = '';
         dettaglioRicambi.value = '';
+        descrizioneLavoro.value = '';
+        boxRicambiSi.classList.remove('attivo');
+        boxRicambiNo.classList.remove('attivo');
         boxDettaglioRicambi.classList.add('hidden');
         boxDescrizioneLavoro.classList.add('hidden');
-        descrizioneLavoro.value = '';
         return;
       }
 
       if (!sceltaRicambi) {
+        boxRicambiSi.classList.remove('attivo');
+        boxRicambiNo.classList.remove('attivo');
         boxDettaglioRicambi.classList.add('hidden');
         boxDescrizioneLavoro.classList.add('hidden');
-        dettaglioRicambi.value = '';
-        descrizioneLavoro.value = '';
         return;
       }
 
+      boxRicambiSi.classList.toggle('attivo', sceltaRicambi === 'si');
+      boxRicambiNo.classList.toggle('attivo', sceltaRicambi === 'no');
+
       if (sceltaRicambi === 'si') {
         boxDettaglioRicambi.classList.remove('hidden');
-        boxDescrizioneLavoro.classList.remove('hidden');
       } else {
         boxDettaglioRicambi.classList.add('hidden');
         dettaglioRicambi.value = '';
-        boxDescrizioneLavoro.classList.remove('hidden');
       }
+
+      boxDescrizioneLavoro.classList.remove('hidden');
+    }
+
+    function selezionaSceltaRicambi(valore) {
+      if (!dataLavoro.value) {
+        alert('Inserisci prima la data');
+        return;
+      }
+
+      sceltaRicambi = valore;
+      aggiornaStepLavoro();
     }
 
     function componiDescrizioneLavoro() {
       const testoLavoro = descrizioneLavoro.value.trim();
-      const sceltaRicambi = ricambiSi.checked ? 'si' : ricambiNo.checked ? 'no' : '';
       const ricambi = dettaglioRicambi.value.trim();
 
       if (!testoLavoro) return '';
@@ -957,9 +1001,7 @@ Cosa hai fatto: ${testoLavoro}`;
         return { ricambiScelta: '', dettaglioRicambi: '', descrizione: '' };
       }
 
-      const match = valore.match(/^Ricambi usati\/da ordinare:\s*(.*?)
-
-Cosa hai fatto:\s*([\s\S]*)$/);
+      const match = valore.match(/^Ricambi usati\/da ordinare:\s*(.*?)\n\nCosa hai fatto:\s*([\s\S]*)$/);
 
       if (match) {
         const dettaglio = (match[1] || '').trim();
@@ -975,10 +1017,9 @@ Cosa hai fatto:\s*([\s\S]*)$/);
 
     function pulisciFormLavoro() {
       dataLavoro.value = '';
-      ricambiSi.checked = false;
-      ricambiNo.checked = false;
       dettaglioRicambi.value = '';
       descrizioneLavoro.value = '';
+      sceltaRicambi = '';
       fatturatoLavoro.checked = false;
       pagatoLavoro.checked = false;
       lavoroInModificaId = null;
@@ -1227,14 +1268,6 @@ Cosa hai fatto:\s*([\s\S]*)$/);
           await toggleStatoLavoro(el.dataset.macchinaId, el.dataset.id, el.dataset.campo, el.checked);
         });
       });
-
-      storicoLavori.querySelectorAll('.lavoro-modifica').forEach(el => {
-        el.addEventListener('click', () => modificaLavoro(el.dataset.macchinaId, el.dataset.id));
-      });
-
-      storicoLavori.querySelectorAll('.lavoro-elimina').forEach(el => {
-        el.addEventListener('click', async () => eliminaLavoro(el.dataset.macchinaId, el.dataset.id));
-      });
     }
 
     function renderTutto() {
@@ -1264,7 +1297,7 @@ Cosa hai fatto:\s*([\s\S]*)$/);
       const macchina = archivio.find(item => item.id === macchinaId);
       if (!macchina) return;
 
-      const lavoro = (macchina.lavori || []).find(item => item.id === idLavoro);
+      const lavoro = (macchina.lavori || []).find(item => String(item.id) === String(idLavoro));
       if (!lavoro) return;
 
       macchinaSelezionataId = macchinaId;
@@ -1272,8 +1305,7 @@ Cosa hai fatto:\s*([\s\S]*)$/);
       lavoroInModificaId = idLavoro;
       dataLavoro.value = lavoro.data;
       const datiDescrizione = leggiDescrizioneSalvata(lavoro.descrizione);
-      ricambiSi.checked = datiDescrizione.ricambiScelta === 'si';
-      ricambiNo.checked = datiDescrizione.ricambiScelta === 'no';
+      sceltaRicambi = datiDescrizione.ricambiScelta;
       dettaglioRicambi.value = datiDescrizione.dettaglioRicambi;
       descrizioneLavoro.value = datiDescrizione.descrizione;
       aggiornaStepLavoro();
@@ -1284,17 +1316,34 @@ Cosa hai fatto:\s*([\s\S]*)$/);
     }
 
     async function eliminaLavoro(macchinaId, idLavoro) {
-      const macchina = archivio.find(item => item.id === macchinaId);
-      if (!macchina) return;
+      const macchina = archivio.find(item => String(item.id) === String(macchinaId));
+      if (!macchina) {
+        alert('Macchina non trovata');
+        return;
+      }
 
       const conferma = confirm('Vuoi eliminare questo lavoro?');
       if (!conferma) return;
 
-      const lavoriAggiornati = (macchina.lavori || []).filter(item => item.id !== idLavoro);
-      await salvaMacchinaFirestore(macchina.id, { lavori: lavoriAggiornati });
+      try {
+        const lavoriOriginali = Array.isArray(macchina.lavori) ? macchina.lavori : [];
+        const lavoriAggiornati = lavoriOriginali.filter(item => String(item.id) !== String(idLavoro));
 
-      if (lavoroInModificaId === idLavoro) {
-        pulisciFormLavoro();
+        if (lavoriAggiornati.length === lavoriOriginali.length) {
+          alert('Non sono riuscito a trovare il lavoro da eliminare. Prova ad aggiornare la pagina.');
+          return;
+        }
+
+        await salvaMacchinaFirestore(macchina.id, { lavori: lavoriAggiornati });
+
+        if (String(lavoroInModificaId) === String(idLavoro)) {
+          pulisciFormLavoro();
+        }
+
+        alert('Lavoro eliminato correttamente');
+      } catch (error) {
+        console.error(error);
+        alert('Errore durante l'eliminazione del lavoro: ' + (error?.message || 'errore sconosciuto'));
       }
     }
 
@@ -1303,11 +1352,24 @@ Cosa hai fatto:\s*([\s\S]*)$/);
       if (!macchina) return;
 
       const lavoriAggiornati = (macchina.lavori || []).map(item =>
-        item.id === idLavoro ? { ...item, [campo]: valore } : item
+        String(item.id) === String(idLavoro) ? { ...item, [campo]: valore } : item
       );
 
       await salvaMacchinaFirestore(macchina.id, { lavori: lavoriAggiornati });
     }
+
+    storicoLavori.addEventListener('click', async function(event) {
+      const bottoneModifica = event.target.closest('.lavoro-modifica');
+      if (bottoneModifica) {
+        modificaLavoro(bottoneModifica.dataset.macchinaId, bottoneModifica.dataset.id);
+        return;
+      }
+
+      const bottoneElimina = event.target.closest('.lavoro-elimina');
+      if (bottoneElimina) {
+        await eliminaLavoro(bottoneElimina.dataset.macchinaId, bottoneElimina.dataset.id);
+      }
+    });
 
     function apriModalEliminaCliente() {
       if (!clienteSelezionatoPerEliminazione) {
@@ -1576,8 +1638,8 @@ Cosa hai fatto:\s*([\s\S]*)$/);
 
 
     dataLavoro.addEventListener('change', aggiornaStepLavoro);
-    ricambiSi.addEventListener('change', aggiornaStepLavoro);
-    ricambiNo.addEventListener('change', aggiornaStepLavoro);
+    boxRicambiSi.addEventListener('click', () => selezionaSceltaRicambi('si'));
+    boxRicambiNo.addEventListener('click', () => selezionaSceltaRicambi('no'));
 
     salvaLavoroBtn.addEventListener('click', async function() {
       const macchina = getMacchinaSelezionata();
@@ -1588,7 +1650,6 @@ Cosa hai fatto:\s*([\s\S]*)$/);
       }
 
       const data = dataLavoro.value;
-      const sceltaRicambi = ricambiSi.checked ? 'si' : ricambiNo.checked ? 'no' : '';
       const descrizioneTesto = descrizioneLavoro.value.trim();
       const ricambiTesto = dettaglioRicambi.value.trim();
 
