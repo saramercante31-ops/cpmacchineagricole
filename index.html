@@ -1028,7 +1028,7 @@ Cosa hai fatto: ${testoLavoro}`;
     }
 
     function getMacchinaSelezionata() {
-      return archivio.find(item => item.id === macchinaSelezionataId);
+      return archivio.find(item => String(item.id) === String(macchinaSelezionataId));
     }
 
     function renderStatistiche() {
@@ -1081,7 +1081,7 @@ Cosa hai fatto: ${testoLavoro}`;
           `;
         }
 
-        const classe = item.id === macchinaSelezionataId ? 'macchina selezionata' : 'macchina';
+        const classe = String(item.id) === String(macchinaSelezionataId) ? 'macchina selezionata' : 'macchina';
         html += `
           <div class="${classe}" data-id="${item.id}">
             <div><strong>${escapeHtml(item.modello)}</strong></div>
@@ -1144,21 +1144,10 @@ Cosa hai fatto: ${testoLavoro}`;
       const haDataDa = !!dataDaFiltro.value;
       const haDataA = !!dataAFiltro.value;
 
-      if (!haDataDa && !haDataA) {
-        return true;
-      }
-
-      if (!lavoro.data) {
-        return false;
-      }
-
-      if (haDataDa && lavoro.data < dataDaFiltro.value) {
-        return false;
-      }
-
-      if (haDataA && lavoro.data > dataAFiltro.value) {
-        return false;
-      }
+      if (!haDataDa && !haDataA) return true;
+      if (!lavoro.data) return false;
+      if (haDataDa && lavoro.data < dataDaFiltro.value) return false;
+      if (haDataA && lavoro.data > dataAFiltro.value) return false;
 
       return true;
     }
@@ -1218,57 +1207,85 @@ Cosa hai fatto: ${testoLavoro}`;
     }
 
     function renderStorico() {
-      aggiornaBottoniFiltro();
+  aggiornaBottoniFiltro();
 
-      const lavoriFiltrati = raccogliLavori();
+  const lavoriFiltrati = raccogliLavori();
 
-      if (lavoriFiltrati.length === 0) {
-        storicoLavori.innerHTML = '<div class="empty">Nessun lavoro trovato</div>';
-        return;
-      }
+  if (lavoriFiltrati.length === 0) {
+    storicoLavori.innerHTML = '<div class="empty">Nessun lavoro trovato</div>';
+    return;
+  }
 
-      let html = '';
+  let html = '';
 
-      lavoriFiltrati.forEach(lavoro => {
-        html += `
-          <div class="storico-item">
-            <div class="storico-top">
-              <div>
-                <div><strong>${formattaData(lavoro.data)}</strong></div>
-                <div>${escapeHtml(lavoro.descrizione)}</div>
-                <div class="small" style="margin-top:6px;">${escapeHtml(lavoro.cliente)} - ${escapeHtml(lavoro.modello)}</div>
-                <div style="margin-top:10px; display:flex; gap:18px; flex-wrap:wrap; align-items:center;">
-                  <label style="display:flex; align-items:center; gap:8px; margin:0; font-weight:600;">
-                    <input type="checkbox" ${lavoro.fatturato ? 'checked' : ''} data-id="${lavoro.id}" data-macchina-id="${lavoro.macchinaId}" data-campo="fatturato" class="toggle-storico" style="width:18px; height:18px;" />
-                    <span>Fatturato</span>
-                  </label>
-                  <label style="display:flex; align-items:center; gap:8px; margin:0; font-weight:600;">
-                    <input type="checkbox" ${lavoro.pagato ? 'checked' : ''} data-id="${lavoro.id}" data-macchina-id="${lavoro.macchinaId}" data-campo="pagato" class="toggle-storico" style="width:18px; height:18px;" />
-                    <span>Pagato</span>
-                  </label>
-                </div>
-                <div>
-                  <span class="badge ${lavoro.fatturato ? 'ok' : 'no'}">${lavoro.fatturato ? 'Fatturato: Sì' : 'Fatturato: No'}</span>
-                  <span class="badge ${lavoro.pagato ? 'ok' : 'no'}">${lavoro.pagato ? 'Pagato: Sì' : 'Pagato: No'}</span>
-                </div>
-              </div>
-              <div class="storico-buttons">
-                <button class="mini-btn btn-gray lavoro-modifica" data-id="${lavoro.id}" data-macchina-id="${lavoro.macchinaId}">Modifica</button>
-                <button class="mini-btn btn-red lavoro-elimina" data-id="${lavoro.id}" data-macchina-id="${lavoro.macchinaId}">Elimina</button>
-              </div>
+  lavoriFiltrati.forEach(lavoro => {
+    html += `
+      <div class="storico-item">
+        <div class="storico-top">
+          <div>
+            <div><strong>${formattaData(lavoro.data)}</strong></div>
+            <div>${escapeHtml(lavoro.descrizione)}</div>
+            <div class="small" style="margin-top:6px;">${escapeHtml(lavoro.cliente)} - ${escapeHtml(lavoro.modello)}</div>
+            <div style="margin-top:10px; display:flex; gap:18px; flex-wrap:wrap; align-items:center;">
+              <label style="display:flex; align-items:center; gap:8px; margin:0; font-weight:600;">
+                <input
+                  type="checkbox"
+                  ${lavoro.fatturato ? 'checked' : ''}
+                  data-id="${lavoro.id}"
+                  data-macchina-id="${lavoro.macchinaId}"
+                  data-campo="fatturato"
+                  class="toggle-storico"
+                  style="width:18px; height:18px;"
+                />
+                <span>Fatturato</span>
+              </label>
+              <label style="display:flex; align-items:center; gap:8px; margin:0; font-weight:600;">
+                <input
+                  type="checkbox"
+                  ${lavoro.pagato ? 'checked' : ''}
+                  data-id="${lavoro.id}"
+                  data-macchina-id="${lavoro.macchinaId}"
+                  data-campo="pagato"
+                  class="toggle-storico"
+                  style="width:18px; height:18px;"
+                />
+                <span>Pagato</span>
+              </label>
+            </div>
+            <div>
+              <span class="badge ${lavoro.fatturato ? 'ok' : 'no'}">${lavoro.fatturato ? 'Fatturato: Sì' : 'Fatturato: No'}</span>
+              <span class="badge ${lavoro.pagato ? 'ok' : 'no'}">${lavoro.pagato ? 'Pagato: Sì' : 'Pagato: No'}</span>
             </div>
           </div>
-        `;
-      });
+          <div class="storico-buttons">
+            <button class="mini-btn btn-gray lavoro-modifica" data-id="${lavoro.id}" data-macchina-id="${lavoro.macchinaId}">Modifica</button>
+            <button class="mini-btn btn-red lavoro-elimina" data-id="${lavoro.id}" data-macchina-id="${lavoro.macchinaId}">Elimina</button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
 
-      storicoLavori.innerHTML = html;
+  storicoLavori.innerHTML = html;
 
-      storicoLavori.querySelectorAll('.toggle-storico').forEach(el => {
-        el.addEventListener('change', async () => {
-          await toggleStatoLavoro(el.dataset.macchinaId, el.dataset.id, el.dataset.campo, el.checked);
-        });
-      });
-    }
+  storicoLavori.querySelectorAll('.toggle-storico').forEach(el => {
+    el.addEventListener('change', async () => {
+      await toggleStatoLavoro(el.dataset.macchinaId, el.dataset.id, el.dataset.campo, el.checked);
+    });
+  });
+
+  storicoLavori.querySelectorAll('.lavoro-modifica').forEach(el => {
+    el.addEventListener('click', () => {
+      modificaLavoro(el.dataset.macchinaId, el.dataset.id);
+    });
+  });
+
+  storicoLavori.querySelectorAll('.lavoro-elimina').forEach(el => {
+    el.addEventListener('click', async () => {
+      await eliminaLavoro(el.dataset.macchinaId, el.dataset.id);
+    });
+  });
+}
 
     function renderTutto() {
       renderStatistiche();
@@ -1294,20 +1311,25 @@ Cosa hai fatto: ${testoLavoro}`;
     }
 
     function modificaLavoro(macchinaId, idLavoro) {
-      const macchina = archivio.find(item => item.id === macchinaId);
+      const macchina = archivio.find(item => String(item.id) === String(macchinaId));
       if (!macchina) return;
 
       const lavoro = (macchina.lavori || []).find(item => String(item.id) === String(idLavoro));
-      if (!lavoro) return;
+      if (!lavoro) {
+        alert('Lavoro non trovato');
+        return;
+      }
 
       macchinaSelezionataId = macchinaId;
       clienteSelezionatoPerEliminazione = macchina.ragioneSociale;
       lavoroInModificaId = idLavoro;
       dataLavoro.value = lavoro.data;
+
       const datiDescrizione = leggiDescrizioneSalvata(lavoro.descrizione);
       sceltaRicambi = datiDescrizione.ricambiScelta;
       dettaglioRicambi.value = datiDescrizione.dettaglioRicambi;
       descrizioneLavoro.value = datiDescrizione.descrizione;
+
       aggiornaStepLavoro();
       fatturatoLavoro.checked = Boolean(lavoro.fatturato);
       pagatoLavoro.checked = Boolean(lavoro.pagato);
@@ -1330,7 +1352,7 @@ Cosa hai fatto: ${testoLavoro}`;
         const lavoriAggiornati = lavoriOriginali.filter(item => String(item.id) !== String(idLavoro));
 
         if (lavoriAggiornati.length === lavoriOriginali.length) {
-          alert('Non sono riuscito a trovare il lavoro da eliminare. Prova ad aggiornare la pagina.');
+          alert('Non sono riuscito a trovare il lavoro da eliminare.');
           return;
         }
 
@@ -1343,33 +1365,22 @@ Cosa hai fatto: ${testoLavoro}`;
         alert('Lavoro eliminato correttamente');
       } catch (error) {
         console.error(error);
-        alert('Errore durante l'eliminazione del lavoro: ' + (error?.message || 'errore sconosciuto'));
+        alert('Errore durante l’eliminazione del lavoro');
       }
     }
 
     async function toggleStatoLavoro(macchinaId, idLavoro, campo, valore) {
-      const macchina = archivio.find(item => item.id === macchinaId);
+      const macchina = archivio.find(item => String(item.id) === String(macchinaId));
       if (!macchina) return;
 
       const lavoriAggiornati = (macchina.lavori || []).map(item =>
-        String(item.id) === String(idLavoro) ? { ...item, [campo]: valore } : item
+        String(item.id) === String(idLavoro)
+          ? { ...item, [campo]: valore }
+          : item
       );
 
       await salvaMacchinaFirestore(macchina.id, { lavori: lavoriAggiornati });
     }
-
-    storicoLavori.addEventListener('click', async function(event) {
-      const bottoneModifica = event.target.closest('.lavoro-modifica');
-      if (bottoneModifica) {
-        modificaLavoro(bottoneModifica.dataset.macchinaId, bottoneModifica.dataset.id);
-        return;
-      }
-
-      const bottoneElimina = event.target.closest('.lavoro-elimina');
-      if (bottoneElimina) {
-        await eliminaLavoro(bottoneElimina.dataset.macchinaId, bottoneElimina.dataset.id);
-      }
-    });
 
     function apriModalEliminaCliente() {
       if (!clienteSelezionatoPerEliminazione) {
@@ -1499,7 +1510,7 @@ Cosa hai fatto: ${testoLavoro}`;
       unsubscribeMacchine = onSnapshot(q, (snapshot) => {
         archivio = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
 
-        if (macchinaSelezionataId && !archivio.some(item => item.id === macchinaSelezionataId)) {
+        if (macchinaSelezionataId && !archivio.some(item => String(item.id) === String(macchinaSelezionataId))) {
           macchinaSelezionataId = null;
         }
 
@@ -1516,48 +1527,22 @@ Cosa hai fatto: ${testoLavoro}`;
     }
 
     loginBtn.addEventListener('click', async function() {
-  const email = loginEmail.value.trim();
-  const password = loginPassword.value;
+      const email = loginEmail.value.trim();
+      const password = loginPassword.value;
 
-  if (!email || !password) {
-    mostraLoginErrore('Inserisci email e password');
-    return;
-  }
+      if (!email || !password) {
+        mostraLoginErrore('Inserisci email e password');
+        return;
+      }
 
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    mostraLoginSuccesso('Accesso effettuato');
-  } catch (error) {
-    console.error(error);
-
-    let messaggio = '';
-
-    switch (error.code) {
-      case 'auth/invalid-credential':
-      case 'auth/wrong-password':
-      case 'auth/user-not-found':
-        messaggio = 'Email o password non corretti';
-        break;
-
-      case 'auth/unauthorized-domain':
-        messaggio = '⚠️ Dominio NON autorizzato su Firebase (problema anteprima)';
-        break;
-
-      case 'auth/network-request-failed':
-        messaggio = '⚠️ Problema di connessione internet';
-        break;
-
-      case 'auth/too-many-requests':
-        messaggio = '⚠️ Troppi tentativi, riprova più tardi';
-        break;
-
-      default:
-        messaggio = 'Errore reale: ' + error.code;
-    }
-
-    mostraLoginErrore(messaggio);
-  }
-});
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        mostraLoginSuccesso('Accesso effettuato');
+      } catch (error) {
+        console.error(error);
+        mostraLoginErrore('Email o password non corretti');
+      }
+    });
 
     logoutBtn.addEventListener('click', async function() {
       await signOut(auth);
@@ -1662,7 +1647,6 @@ Cosa hai fatto: ${testoLavoro}`;
       renderTutto();
     });
 
-
     dataLavoro.addEventListener('change', aggiornaStepLavoro);
     boxRicambiSi.addEventListener('click', () => selezionaSceltaRicambi('si'));
     boxRicambiNo.addEventListener('click', () => selezionaSceltaRicambi('no'));
@@ -1705,7 +1689,7 @@ Cosa hai fatto: ${testoLavoro}`;
 
       if (lavoroInModificaId) {
         lavoriAggiornati = lavoriAggiornati.map(item =>
-          item.id === lavoroInModificaId
+          String(item.id) === String(lavoroInModificaId)
             ? {
                 ...item,
                 data,
