@@ -576,8 +576,27 @@
         </div>
 
         <div>
-          <label for="descrizioneLavoro">Descrizione</label>
-          <textarea id="descrizioneLavoro" placeholder="Descrizione del lavoro svolto..."></textarea>
+          <label>Ricambi usati o da ordinare?</label>
+          <div class="toggle-group" id="ricambiStepBox">
+            <div class="check-row">
+              <input type="radio" name="ricambiScelta" id="ricambiSi" value="si" />
+              <span>Sì</span>
+            </div>
+            <div class="check-row">
+              <input type="radio" name="ricambiScelta" id="ricambiNo" value="no" />
+              <span>No</span>
+            </div>
+          </div>
+
+          <div id="boxDettaglioRicambi" class="hidden" style="margin-top:12px;">
+            <label for="dettaglioRicambi">Ricambi usati o da ordinare</label>
+            <textarea id="dettaglioRicambi" placeholder="Scrivi qui i ricambi usati o da ordinare..."></textarea>
+          </div>
+
+          <div id="boxDescrizioneLavoro" class="hidden" style="margin-top:12px;">
+            <label for="descrizioneLavoro">Cosa hai fatto</label>
+            <textarea id="descrizioneLavoro" placeholder="Scrivi qui cosa hai fatto per questo cliente e questa macchina..."></textarea>
+          </div>
         </div>
 
         <div class="toggle-group">
@@ -702,6 +721,11 @@
     const resetVistaBtn = document.getElementById('resetVistaBtn');
     const eliminaClienteBtn = document.getElementById('eliminaClienteBtn');
     const dataLavoro = document.getElementById('dataLavoro');
+    const ricambiSi = document.getElementById('ricambiSi');
+    const ricambiNo = document.getElementById('ricambiNo');
+    const dettaglioRicambi = document.getElementById('dettaglioRicambi');
+    const boxDettaglioRicambi = document.getElementById('boxDettaglioRicambi');
+    const boxDescrizioneLavoro = document.getElementById('boxDescrizioneLavoro');
     const descrizioneLavoro = document.getElementById('descrizioneLavoro');
     const fatturatoLavoro = document.getElementById('fatturatoLavoro');
     const pagatoLavoro = document.getElementById('pagatoLavoro');
@@ -873,13 +897,93 @@
       renderClientiSimili();
     }
 
+    function aggiornaStepLavoro() {
+      const dataPresente = !!dataLavoro.value;
+      const sceltaRicambi = ricambiSi.checked ? 'si' : ricambiNo.checked ? 'no' : '';
+
+      ricambiSi.disabled = !dataPresente;
+      ricambiNo.disabled = !dataPresente;
+
+      if (!dataPresente) {
+        ricambiSi.checked = false;
+        ricambiNo.checked = false;
+        dettaglioRicambi.value = '';
+        boxDettaglioRicambi.classList.add('hidden');
+        boxDescrizioneLavoro.classList.add('hidden');
+        descrizioneLavoro.value = '';
+        return;
+      }
+
+      if (!sceltaRicambi) {
+        boxDettaglioRicambi.classList.add('hidden');
+        boxDescrizioneLavoro.classList.add('hidden');
+        dettaglioRicambi.value = '';
+        descrizioneLavoro.value = '';
+        return;
+      }
+
+      if (sceltaRicambi === 'si') {
+        boxDettaglioRicambi.classList.remove('hidden');
+        boxDescrizioneLavoro.classList.remove('hidden');
+      } else {
+        boxDettaglioRicambi.classList.add('hidden');
+        dettaglioRicambi.value = '';
+        boxDescrizioneLavoro.classList.remove('hidden');
+      }
+    }
+
+    function componiDescrizioneLavoro() {
+      const testoLavoro = descrizioneLavoro.value.trim();
+      const sceltaRicambi = ricambiSi.checked ? 'si' : ricambiNo.checked ? 'no' : '';
+      const ricambi = dettaglioRicambi.value.trim();
+
+      if (!testoLavoro) return '';
+
+      if (sceltaRicambi === 'si') {
+        return `Ricambi usati/da ordinare: ${ricambi}
+
+Cosa hai fatto: ${testoLavoro}`;
+      }
+
+      return `Ricambi usati/da ordinare: Nessuno
+
+Cosa hai fatto: ${testoLavoro}`;
+    }
+
+    function leggiDescrizioneSalvata(testo) {
+      const valore = String(testo || '').trim();
+
+      if (!valore) {
+        return { ricambiScelta: '', dettaglioRicambi: '', descrizione: '' };
+      }
+
+      const match = valore.match(/^Ricambi usati\/da ordinare:\s*(.*?)
+
+Cosa hai fatto:\s*([\s\S]*)$/);
+
+      if (match) {
+        const dettaglio = (match[1] || '').trim();
+        return {
+          ricambiScelta: dettaglio && dettaglio.toLowerCase() !== 'nessuno' ? 'si' : 'no',
+          dettaglioRicambi: dettaglio && dettaglio.toLowerCase() !== 'nessuno' ? dettaglio : '',
+          descrizione: (match[2] || '').trim()
+        };
+      }
+
+      return { ricambiScelta: '', dettaglioRicambi: '', descrizione: valore };
+    }
+
     function pulisciFormLavoro() {
       dataLavoro.value = '';
+      ricambiSi.checked = false;
+      ricambiNo.checked = false;
+      dettaglioRicambi.value = '';
       descrizioneLavoro.value = '';
       fatturatoLavoro.checked = false;
       pagatoLavoro.checked = false;
       lavoroInModificaId = null;
       salvaLavoroBtn.textContent = 'Salva lavoro';
+      aggiornaStepLavoro();
     }
 
     function getMacchinaSelezionata() {
@@ -1167,7 +1271,12 @@
       clienteSelezionatoPerEliminazione = macchina.ragioneSociale;
       lavoroInModificaId = idLavoro;
       dataLavoro.value = lavoro.data;
-      descrizioneLavoro.value = lavoro.descrizione;
+      const datiDescrizione = leggiDescrizioneSalvata(lavoro.descrizione);
+      ricambiSi.checked = datiDescrizione.ricambiScelta === 'si';
+      ricambiNo.checked = datiDescrizione.ricambiScelta === 'no';
+      dettaglioRicambi.value = datiDescrizione.dettaglioRicambi;
+      descrizioneLavoro.value = datiDescrizione.descrizione;
+      aggiornaStepLavoro();
       fatturatoLavoro.checked = Boolean(lavoro.fatturato);
       pagatoLavoro.checked = Boolean(lavoro.pagato);
       salvaLavoroBtn.textContent = 'Aggiorna lavoro';
@@ -1465,6 +1574,11 @@
       renderTutto();
     });
 
+
+    dataLavoro.addEventListener('change', aggiornaStepLavoro);
+    ricambiSi.addEventListener('change', aggiornaStepLavoro);
+    ricambiNo.addEventListener('change', aggiornaStepLavoro);
+
     salvaLavoroBtn.addEventListener('click', async function() {
       const macchina = getMacchinaSelezionata();
 
@@ -1474,12 +1588,31 @@
       }
 
       const data = dataLavoro.value;
-      const descrizione = descrizioneLavoro.value.trim();
+      const sceltaRicambi = ricambiSi.checked ? 'si' : ricambiNo.checked ? 'no' : '';
+      const descrizioneTesto = descrizioneLavoro.value.trim();
+      const ricambiTesto = dettaglioRicambi.value.trim();
 
-      if (!data || !descrizione) {
-        alert('Inserisci data e descrizione');
+      if (!data) {
+        alert('Inserisci prima la data');
         return;
       }
+
+      if (!sceltaRicambi) {
+        alert('Dopo la data devi indicare se hai usato ricambi o se devi ordinare ricambi');
+        return;
+      }
+
+      if (sceltaRicambi === 'si' && !ricambiTesto) {
+        alert('Hai selezionato sì: scrivi i ricambi usati o da ordinare');
+        return;
+      }
+
+      if (!descrizioneTesto) {
+        alert('Scrivi cosa hai fatto');
+        return;
+      }
+
+      const descrizione = componiDescrizioneLavoro();
 
       let lavoriAggiornati = Array.isArray(macchina.lavori) ? [...macchina.lavori] : [];
 
@@ -1561,6 +1694,8 @@
     pdfPagatiBtn.addEventListener('click', function() {
       esportaPdf('pagati', 'Pagati');
     });
+
+    aggiornaStepLavoro();
   </script>
 </body>
 </html>
