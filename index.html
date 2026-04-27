@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CP Macchine Agricole</title>
+  <link rel="icon" href="logo.png">
   <style>
     :root {
       --bg: #f3f4f6;
@@ -584,8 +585,9 @@
 <body>
   <div id="loginScreen" class="login-wrap">
     <div class="login-card">
-      <h1>CP Macchine Agricole</h1>
-      <p>Accedi per usare il gestionale.</p>
+      <img src="logo.png" style="height:80px; display:block; margin:0 auto 15px; background:#000; padding:8px; border-radius:12px;">
+      <h1 style="text-align:center;">CP Macchine Agricole</h1>
+      <p style="text-align:center;">Accedi per usare il gestionale.</p>
 
       <div>
         <label for="loginEmail">Email</label>
@@ -608,9 +610,12 @@
   <div class="container hidden" id="appScreen">
     <div class="card">
       <div class="toolbar">
-        <div>
-          <h1 style="margin-bottom:4px;">CP Macchine Agricole</h1>
-          <p style="margin-bottom:0;">Gestionale protetto con accesso.</p>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <img src="logo.png" style="height:45px; background:#000; padding:6px; border-radius:10px;">
+          <div>
+            <h1 style="margin:0;">CP Macchine Agricole</h1>
+            <p style="margin:0;">Gestionale protetto con accesso.</p>
+          </div>
         </div>
         <div style="text-align:right;">
           <div class="small" id="utenteLoggato">Utente non rilevato</div>
