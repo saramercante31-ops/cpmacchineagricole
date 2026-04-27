@@ -463,6 +463,96 @@
       transform: none;
     }
 
+
+
+    .view-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+    }
+
+    .view-tab {
+      width: auto;
+      min-width: 160px;
+      border-radius: 999px;
+      padding: 12px 18px;
+    }
+
+    .ricambi-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .ricambi-table th,
+    .ricambi-table td {
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    .ricambi-table th {
+      background: var(--light);
+      font-weight: 700;
+    }
+
+    .ricambi-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .ricambi-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .ricambi-actions button {
+      width: auto;
+      min-width: 90px;
+    }
+
+    @media (max-width: 760px) {
+      .ricambi-table,
+      .ricambi-table thead,
+      .ricambi-table tbody,
+      .ricambi-table th,
+      .ricambi-table td,
+      .ricambi-table tr {
+        display: block;
+      }
+
+      .ricambi-table thead {
+        display: none;
+      }
+
+      .ricambi-table tr {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        margin-bottom: 12px;
+        overflow: hidden;
+      }
+
+      .ricambi-table td {
+        border-bottom: 1px solid var(--line);
+      }
+
+      .ricambi-table td::before {
+        content: attr(data-label);
+        display: block;
+        font-weight: 700;
+        color: var(--muted);
+        margin-bottom: 4px;
+        font-size: 12px;
+      }
+    }
+
     @media (max-width: 1024px) {
       .stats-grid {
         grid-template-columns: 1fr;
@@ -542,10 +632,16 @@
           <div class="stat-value" id="statLavori">0</div>
         </div>
       </div>
+
+      <div class="view-tabs">
+        <button class="view-tab btn-dark" id="tabLavoriBtn">Lavori</button>
+        <button class="view-tab btn-gray" id="tabRicambiBtn">Ricambi</button>
+      </div>
     </div>
 
-    <div class="card">
-      <h2>Aggiungi cliente e macchina</h2>
+    <div id="lavoriScreen">
+      <div class="card">
+        <h2>Aggiungi cliente e macchina</h2>
       <div class="grid-3">
         <div>
           <label for="nuovaRagioneSociale">Ragione sociale</label>
@@ -687,6 +783,84 @@
 
       <div id="storicoLavori" class="lista">Nessun lavoro trovato</div>
     </div>
+    </div>
+
+    <div id="ricambiScreen" class="hidden">
+      <div class="card">
+        <h2>Ricambi</h2>
+        <p>Archivio ricambi con ricerca per marca trattore, modello, nome pezzo e codice ricambio.</p>
+
+        <h3>Aggiungi o modifica ricambio</h3>
+        <div class="grid-3">
+          <div>
+            <label for="marcaTrattoreRicambio">Marca trattore</label>
+            <input type="text" id="marcaTrattoreRicambio" placeholder="Es. New Holland" />
+          </div>
+          <div>
+            <label for="modelloTrattoreRicambio">Modello trattore</label>
+            <input type="text" id="modelloTrattoreRicambio" placeholder="Es. T5.110" />
+          </div>
+          <div>
+            <label for="nomePezzoRicambio">Nome pezzo</label>
+            <input type="text" id="nomePezzoRicambio" placeholder="Es. Filtro gasolio" />
+          </div>
+        </div>
+
+        <div class="grid-3" style="margin-top:14px;">
+          <div>
+            <label for="codiceRicambio">Codice ricambio</label>
+            <input type="text" id="codiceRicambio" placeholder="Es. FG-12345" />
+          </div>
+          <div>
+            <label for="prezzoAcquistoRicambio">Prezzo acquisto</label>
+            <input type="number" id="prezzoAcquistoRicambio" placeholder="Es. 28.50" min="0" step="0.01" />
+          </div>
+          <div style="display:flex; gap:10px; align-items:end;">
+            <button class="btn-green" id="salvaRicambioBtn">Salva ricambio</button>
+            <button class="btn-gray" id="annullaRicambioBtn">Pulisci</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Cerca ricambi</h2>
+        <div class="grid-3">
+          <div>
+            <label for="filtroMarcaRicambio">Marca trattore</label>
+            <input type="text" id="filtroMarcaRicambio" placeholder="Cerca marca..." />
+          </div>
+          <div>
+            <label for="filtroModelloRicambio">Modello trattore</label>
+            <input type="text" id="filtroModelloRicambio" placeholder="Cerca modello..." />
+          </div>
+          <div>
+            <label for="filtroNomeRicambio">Nome pezzo</label>
+            <input type="text" id="filtroNomeRicambio" placeholder="Cerca pezzo..." />
+          </div>
+        </div>
+
+        <div class="grid-3" style="margin-top:14px;">
+          <div>
+            <label for="filtroCodiceRicambio">Codice ricambio</label>
+            <input type="text" id="filtroCodiceRicambio" placeholder="Cerca codice..." />
+          </div>
+          <div></div>
+          <div style="display:flex; align-items:end;">
+            <button class="btn-gray" id="pulisciFiltriRicambiBtn">Pulisci filtri</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="toolbar" style="margin-bottom:14px;">
+          <div>
+            <h2 style="margin-bottom:4px;">Lista ricambi</h2>
+            <p style="margin-bottom:0;" id="conteggioRicambi">0 ricambi trovati</p>
+          </div>
+        </div>
+        <div id="listaRicambi" class="lista">Nessun ricambio trovato</div>
+      </div>
+    </div>
   </div>
 
   <div id="confirmDeleteClienteModal" class="modal-overlay hidden">
@@ -785,6 +959,25 @@
     const pdfDaIncassareBtn = document.getElementById('pdfDaIncassareBtn');
     const pdfPagatiBtn = document.getElementById('pdfPagatiBtn');
 
+    const tabLavoriBtn = document.getElementById('tabLavoriBtn');
+    const tabRicambiBtn = document.getElementById('tabRicambiBtn');
+    const lavoriScreen = document.getElementById('lavoriScreen');
+    const ricambiScreen = document.getElementById('ricambiScreen');
+    const marcaTrattoreRicambio = document.getElementById('marcaTrattoreRicambio');
+    const modelloTrattoreRicambio = document.getElementById('modelloTrattoreRicambio');
+    const nomePezzoRicambio = document.getElementById('nomePezzoRicambio');
+    const codiceRicambio = document.getElementById('codiceRicambio');
+    const prezzoAcquistoRicambio = document.getElementById('prezzoAcquistoRicambio');
+    const salvaRicambioBtn = document.getElementById('salvaRicambioBtn');
+    const annullaRicambioBtn = document.getElementById('annullaRicambioBtn');
+    const filtroMarcaRicambio = document.getElementById('filtroMarcaRicambio');
+    const filtroModelloRicambio = document.getElementById('filtroModelloRicambio');
+    const filtroNomeRicambio = document.getElementById('filtroNomeRicambio');
+    const filtroCodiceRicambio = document.getElementById('filtroCodiceRicambio');
+    const pulisciFiltriRicambiBtn = document.getElementById('pulisciFiltriRicambiBtn');
+    const listaRicambi = document.getElementById('listaRicambi');
+    const conteggioRicambi = document.getElementById('conteggioRicambi');
+
     const confirmDeleteClienteModal = document.getElementById('confirmDeleteClienteModal');
     const confirmDeleteClienteText = document.getElementById('confirmDeleteClienteText');
     const annullaEliminaClienteBtn = document.getElementById('annullaEliminaClienteBtn');
@@ -796,6 +989,10 @@
     let lavoroInModificaId = null;
     let filtroStorico = 'tutti';
     let unsubscribeMacchine = null;
+    let unsubscribeRicambi = null;
+    let ricambiArchivio = [];
+    let ricambioInModificaId = null;
+    let vistaAttiva = 'lavori';
     let clienteEsistenteSelezionato = '';
     let clienteSelezionatoPerEliminazione = '';
     let sceltaRicambi = '';
@@ -1311,6 +1508,200 @@ Cosa hai fatto: ${testoLavoro}`;
       aggiornaPulsanteEliminaCliente();
     }
 
+    function cambiaVista(vista) {
+      vistaAttiva = vista;
+
+      if (vista === 'ricambi') {
+        lavoriScreen.classList.add('hidden');
+        ricambiScreen.classList.remove('hidden');
+        tabLavoriBtn.className = 'view-tab btn-gray';
+        tabRicambiBtn.className = 'view-tab btn-dark';
+      } else {
+        ricambiScreen.classList.add('hidden');
+        lavoriScreen.classList.remove('hidden');
+        tabRicambiBtn.className = 'view-tab btn-gray';
+        tabLavoriBtn.className = 'view-tab btn-dark';
+      }
+    }
+
+    function pulisciFormRicambio() {
+      marcaTrattoreRicambio.value = '';
+      modelloTrattoreRicambio.value = '';
+      nomePezzoRicambio.value = '';
+      codiceRicambio.value = '';
+      prezzoAcquistoRicambio.value = '';
+      ricambioInModificaId = null;
+      salvaRicambioBtn.textContent = 'Salva ricambio';
+    }
+
+    function pulisciFiltriRicambi() {
+      filtroMarcaRicambio.value = '';
+      filtroModelloRicambio.value = '';
+      filtroNomeRicambio.value = '';
+      filtroCodiceRicambio.value = '';
+      renderRicambi();
+    }
+
+    function prezzoEuro(valore) {
+      const numero = Number(valore || 0);
+      return numero.toLocaleString('it-IT', { style: 'currency', currency: 'EUR' });
+    }
+
+    function ricambioPassaFiltri(ricambio) {
+      const marca = normalizzaTesto(filtroMarcaRicambio.value);
+      const modello = normalizzaTesto(filtroModelloRicambio.value);
+      const nome = normalizzaTesto(filtroNomeRicambio.value);
+      const codice = normalizzaTesto(filtroCodiceRicambio.value);
+
+      if (marca && !normalizzaTesto(ricambio.marcaTrattore).includes(marca)) return false;
+      if (modello && !normalizzaTesto(ricambio.modelloTrattore).includes(modello)) return false;
+      if (nome && !normalizzaTesto(ricambio.nomePezzo).includes(nome)) return false;
+      if (codice && !normalizzaTesto(ricambio.codiceRicambio).includes(codice)) return false;
+
+      return true;
+    }
+
+    function renderRicambi() {
+      const ricambiFiltrati = ricambiArchivio
+        .filter(ricambioPassaFiltri)
+        .sort((a, b) => {
+          const testoA = `${a.marcaTrattore || ''} ${a.modelloTrattore || ''} ${a.nomePezzo || ''}`;
+          const testoB = `${b.marcaTrattore || ''} ${b.modelloTrattore || ''} ${b.nomePezzo || ''}`;
+          return testoA.localeCompare(testoB, 'it', { sensitivity: 'base' });
+        });
+
+      conteggioRicambi.textContent = `${ricambiFiltrati.length} ricambi trovati`;
+
+      if (!ricambiFiltrati.length) {
+        listaRicambi.innerHTML = '<div class="empty">Nessun ricambio trovato</div>';
+        return;
+      }
+
+      listaRicambi.innerHTML = `
+        <table class="ricambi-table">
+          <thead>
+            <tr>
+              <th>Marca trattore</th>
+              <th>Modello trattore</th>
+              <th>Nome pezzo</th>
+              <th>Codice ricambio</th>
+              <th>Prezzo acquisto</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${ricambiFiltrati.map(ricambio => `
+              <tr>
+                <td data-label="Marca trattore">${escapeHtml(ricambio.marcaTrattore)}</td>
+                <td data-label="Modello trattore">${escapeHtml(ricambio.modelloTrattore)}</td>
+                <td data-label="Nome pezzo"><strong>${escapeHtml(ricambio.nomePezzo)}</strong></td>
+                <td data-label="Codice ricambio">${escapeHtml(ricambio.codiceRicambio || '-')}</td>
+                <td data-label="Prezzo acquisto"><strong>${prezzoEuro(ricambio.prezzoAcquisto)}</strong></td>
+                <td data-label="Azioni">
+                  <div class="ricambi-actions">
+                    <button class="mini-btn btn-gray ricambio-modifica" data-id="${ricambio.id}">Modifica</button>
+                    <button class="mini-btn btn-red ricambio-elimina" data-id="${ricambio.id}">Elimina</button>
+                  </div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      listaRicambi.querySelectorAll('.ricambio-modifica').forEach(btn => {
+        btn.addEventListener('click', () => modificaRicambio(btn.dataset.id));
+      });
+
+      listaRicambi.querySelectorAll('.ricambio-elimina').forEach(btn => {
+        btn.addEventListener('click', async () => eliminaRicambio(btn.dataset.id));
+      });
+    }
+
+    function modificaRicambio(id) {
+      const ricambio = ricambiArchivio.find(item => String(item.id) === String(id));
+      if (!ricambio) {
+        alert('Ricambio non trovato');
+        return;
+      }
+
+      ricambioInModificaId = id;
+      marcaTrattoreRicambio.value = ricambio.marcaTrattore || '';
+      modelloTrattoreRicambio.value = ricambio.modelloTrattore || '';
+      nomePezzoRicambio.value = ricambio.nomePezzo || '';
+      codiceRicambio.value = ricambio.codiceRicambio || '';
+      prezzoAcquistoRicambio.value = ricambio.prezzoAcquisto || '';
+      salvaRicambioBtn.textContent = 'Aggiorna ricambio';
+      cambiaVista('ricambi');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function salvaRicambio() {
+      const marcaTrattore = marcaTrattoreRicambio.value.trim();
+      const modelloTrattore = modelloTrattoreRicambio.value.trim();
+      const nomePezzo = nomePezzoRicambio.value.trim();
+      const codice = codiceRicambio.value.trim();
+      const prezzo = prezzoAcquistoRicambio.value;
+
+      if (!marcaTrattore || !modelloTrattore || !nomePezzo || !prezzo) {
+        alert('Compila marca trattore, modello trattore, nome pezzo e prezzo acquisto');
+        return;
+      }
+
+      const dati = {
+        marcaTrattore,
+        modelloTrattore,
+        nomePezzo,
+        codiceRicambio: codice,
+        prezzoAcquisto: Number(prezzo)
+      };
+
+      try {
+        if (ricambioInModificaId) {
+          await updateDoc(doc(db, 'ricambi', ricambioInModificaId), dati);
+        } else {
+          await addDoc(collection(db, 'ricambi'), dati);
+        }
+
+        pulisciFormRicambio();
+      } catch (error) {
+        console.error(error);
+        alert('Errore durante il salvataggio del ricambio');
+      }
+    }
+
+    async function eliminaRicambio(id) {
+      const ricambio = ricambiArchivio.find(item => String(item.id) === String(id));
+      if (!ricambio) {
+        alert('Ricambio non trovato');
+        return;
+      }
+
+      const conferma = confirm(`Vuoi eliminare il ricambio "${ricambio.nomePezzo || ''}"?`);
+      if (!conferma) return;
+
+      try {
+        await deleteDoc(doc(db, 'ricambi', id));
+        if (String(ricambioInModificaId) === String(id)) {
+          pulisciFormRicambio();
+        }
+      } catch (error) {
+        console.error(error);
+        alert('Errore durante l’eliminazione del ricambio');
+      }
+    }
+
+    function avviaSyncRicambi() {
+      if (unsubscribeRicambi) unsubscribeRicambi();
+
+      unsubscribeRicambi = onSnapshot(collection(db, 'ricambi'), (snapshot) => {
+        ricambiArchivio = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderRicambi();
+      }, (error) => {
+        console.error(error);
+      });
+    }
+
     async function salvaMacchinaFirestore(macchinaId, patch) {
       await updateDoc(doc(db, 'macchine', macchinaId), patch);
     }
@@ -1573,6 +1964,7 @@ Cosa hai fatto: ${testoLavoro}`;
         utenteLoggato.textContent = `Accesso: ${user.email}`;
         loginMessage.innerHTML = '';
         avviaSyncRealtime();
+        avviaSyncRicambi();
       } else {
         loginScreen.classList.remove('hidden');
         appScreen.classList.add('hidden');
@@ -1603,6 +1995,15 @@ Cosa hai fatto: ${testoLavoro}`;
           unsubscribeMacchine = null;
         }
 
+        if (unsubscribeRicambi) {
+          unsubscribeRicambi();
+          unsubscribeRicambi = null;
+        }
+
+        ricambiArchivio = [];
+        pulisciFormRicambio();
+        pulisciFiltriRicambi();
+        cambiaVista('lavori');
         renderTutto();
       }
     });
@@ -1792,7 +2193,25 @@ Cosa hai fatto: ${testoLavoro}`;
       esportaPdf('pagati', 'Pagati');
     });
 
+    tabLavoriBtn.addEventListener('click', function() {
+      cambiaVista('lavori');
+    });
+
+    tabRicambiBtn.addEventListener('click', function() {
+      cambiaVista('ricambi');
+    });
+
+    salvaRicambioBtn.addEventListener('click', salvaRicambio);
+    annullaRicambioBtn.addEventListener('click', pulisciFormRicambio);
+    pulisciFiltriRicambiBtn.addEventListener('click', pulisciFiltriRicambi);
+
+    [filtroMarcaRicambio, filtroModelloRicambio, filtroNomeRicambio, filtroCodiceRicambio].forEach(input => {
+      input.addEventListener('input', renderRicambi);
+    });
+
     aggiornaStepLavoro();
+    cambiaVista('lavori');
+    renderRicambi();
   </script>
 </body>
 </html>
