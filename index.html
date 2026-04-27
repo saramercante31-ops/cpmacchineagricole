@@ -788,7 +788,7 @@
     <div id="ricambiScreen" class="hidden">
       <div class="card">
         <h2>Ricambi</h2>
-        <p>Archivio ricambi con ricerca per marca trattore, modello, nome pezzo e codice ricambio.</p>
+        <p>Archivio ricambi con ricerca per marca trattore, modello e nome pezzo.</p>
 
         <h3>Aggiungi o modifica ricambio</h3>
         <div class="grid-3">
@@ -807,10 +807,6 @@
         </div>
 
         <div class="grid-3" style="margin-top:14px;">
-          <div>
-            <label for="codiceRicambio">Codice ricambio</label>
-            <input type="text" id="codiceRicambio" placeholder="Es. FG-12345" />
-          </div>
           <div>
             <label for="prezzoAcquistoRicambio">Prezzo acquisto</label>
             <input type="number" id="prezzoAcquistoRicambio" placeholder="Es. 28.50" min="0" step="0.01" />
@@ -840,10 +836,6 @@
         </div>
 
         <div class="grid-3" style="margin-top:14px;">
-          <div>
-            <label for="filtroCodiceRicambio">Codice ricambio</label>
-            <input type="text" id="filtroCodiceRicambio" placeholder="Cerca codice..." />
-          </div>
           <div></div>
           <div style="display:flex; align-items:end;">
             <button class="btn-gray" id="pulisciFiltriRicambiBtn">Pulisci filtri</button>
@@ -966,14 +958,12 @@
     const marcaTrattoreRicambio = document.getElementById('marcaTrattoreRicambio');
     const modelloTrattoreRicambio = document.getElementById('modelloTrattoreRicambio');
     const nomePezzoRicambio = document.getElementById('nomePezzoRicambio');
-    const codiceRicambio = document.getElementById('codiceRicambio');
     const prezzoAcquistoRicambio = document.getElementById('prezzoAcquistoRicambio');
     const salvaRicambioBtn = document.getElementById('salvaRicambioBtn');
     const annullaRicambioBtn = document.getElementById('annullaRicambioBtn');
     const filtroMarcaRicambio = document.getElementById('filtroMarcaRicambio');
     const filtroModelloRicambio = document.getElementById('filtroModelloRicambio');
     const filtroNomeRicambio = document.getElementById('filtroNomeRicambio');
-    const filtroCodiceRicambio = document.getElementById('filtroCodiceRicambio');
     const pulisciFiltriRicambiBtn = document.getElementById('pulisciFiltriRicambiBtn');
     const listaRicambi = document.getElementById('listaRicambi');
     const conteggioRicambi = document.getElementById('conteggioRicambi');
@@ -1528,7 +1518,6 @@ Cosa hai fatto: ${testoLavoro}`;
       marcaTrattoreRicambio.value = '';
       modelloTrattoreRicambio.value = '';
       nomePezzoRicambio.value = '';
-      codiceRicambio.value = '';
       prezzoAcquistoRicambio.value = '';
       ricambioInModificaId = null;
       salvaRicambioBtn.textContent = 'Salva ricambio';
@@ -1538,7 +1527,6 @@ Cosa hai fatto: ${testoLavoro}`;
       filtroMarcaRicambio.value = '';
       filtroModelloRicambio.value = '';
       filtroNomeRicambio.value = '';
-      filtroCodiceRicambio.value = '';
       renderRicambi();
     }
 
@@ -1551,12 +1539,9 @@ Cosa hai fatto: ${testoLavoro}`;
       const marca = normalizzaTesto(filtroMarcaRicambio.value);
       const modello = normalizzaTesto(filtroModelloRicambio.value);
       const nome = normalizzaTesto(filtroNomeRicambio.value);
-      const codice = normalizzaTesto(filtroCodiceRicambio.value);
-
       if (marca && !normalizzaTesto(ricambio.marcaTrattore).includes(marca)) return false;
       if (modello && !normalizzaTesto(ricambio.modelloTrattore).includes(modello)) return false;
       if (nome && !normalizzaTesto(ricambio.nomePezzo).includes(nome)) return false;
-      if (codice && !normalizzaTesto(ricambio.codiceRicambio).includes(codice)) return false;
 
       return true;
     }
@@ -1584,7 +1569,6 @@ Cosa hai fatto: ${testoLavoro}`;
               <th>Marca trattore</th>
               <th>Modello trattore</th>
               <th>Nome pezzo</th>
-              <th>Codice ricambio</th>
               <th>Prezzo acquisto</th>
               <th>Azioni</th>
             </tr>
@@ -1595,7 +1579,6 @@ Cosa hai fatto: ${testoLavoro}`;
                 <td data-label="Marca trattore">${escapeHtml(ricambio.marcaTrattore)}</td>
                 <td data-label="Modello trattore">${escapeHtml(ricambio.modelloTrattore)}</td>
                 <td data-label="Nome pezzo"><strong>${escapeHtml(ricambio.nomePezzo)}</strong></td>
-                <td data-label="Codice ricambio">${escapeHtml(ricambio.codiceRicambio || '-')}</td>
                 <td data-label="Prezzo acquisto"><strong>${prezzoEuro(ricambio.prezzoAcquisto)}</strong></td>
                 <td data-label="Azioni">
                   <div class="ricambi-actions">
@@ -1629,7 +1612,6 @@ Cosa hai fatto: ${testoLavoro}`;
       marcaTrattoreRicambio.value = ricambio.marcaTrattore || '';
       modelloTrattoreRicambio.value = ricambio.modelloTrattore || '';
       nomePezzoRicambio.value = ricambio.nomePezzo || '';
-      codiceRicambio.value = ricambio.codiceRicambio || '';
       prezzoAcquistoRicambio.value = ricambio.prezzoAcquisto || '';
       salvaRicambioBtn.textContent = 'Aggiorna ricambio';
       cambiaVista('ricambi');
@@ -1640,7 +1622,6 @@ Cosa hai fatto: ${testoLavoro}`;
       const marcaTrattore = marcaTrattoreRicambio.value.trim();
       const modelloTrattore = modelloTrattoreRicambio.value.trim();
       const nomePezzo = nomePezzoRicambio.value.trim();
-      const codice = codiceRicambio.value.trim();
       const prezzo = prezzoAcquistoRicambio.value;
 
       if (!marcaTrattore || !modelloTrattore || !nomePezzo || !prezzo) {
@@ -1652,7 +1633,6 @@ Cosa hai fatto: ${testoLavoro}`;
         marcaTrattore,
         modelloTrattore,
         nomePezzo,
-        codiceRicambio: codice,
         prezzoAcquisto: Number(prezzo)
       };
 
@@ -2205,7 +2185,7 @@ Cosa hai fatto: ${testoLavoro}`;
     annullaRicambioBtn.addEventListener('click', pulisciFormRicambio);
     pulisciFiltriRicambiBtn.addEventListener('click', pulisciFiltriRicambi);
 
-    [filtroMarcaRicambio, filtroModelloRicambio, filtroNomeRicambio, filtroCodiceRicambio].forEach(input => {
+    [filtroMarcaRicambio, filtroModelloRicambio, filtroNomeRicambio].forEach(input => {
       input.addEventListener('input', renderRicambi);
     });
 
