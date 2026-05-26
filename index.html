@@ -1325,7 +1325,7 @@ Cosa hai fatto: ${testoLavoro}`;
       infoMacchinaSelezionata.innerHTML = `
         <div><strong>Ragione sociale:</strong> ${escapeHtml(macchina.ragioneSociale)}</div>
         <div><strong>Modello:</strong> ${escapeHtml(macchina.modello)}</div>
-        <div><strong>Note macchina:</strong> ${escapeHtml(macchina.noteMacchina || '-')}</div>
+        <div style="margin-top:14px;padding:12px;background:#f6f6f6;border-left:5px solid #2d3748;border-radius:8px;white-space:pre-wrap;"><strong>NOTE MACCHINA</strong><br><br>${escapeHtml(macchina.noteMacchina || 'Nessuna nota')}</div>
         <div class="small" style="margin-top:10px;">Lavori registrati: ${(macchina.lavori || []).length}</div>
       `;
     }
@@ -1358,7 +1358,8 @@ Cosa hai fatto: ${testoLavoro}`;
           ...lavoro,
           macchinaId: macchina.id,
           cliente: macchina.ragioneSociale,
-          modello: macchina.modello
+          modello: macchina.modello,
+          noteMacchina: macchina.noteMacchina || ''
         }));
       } else if (ricercaCorrente.trim()) {
         const macchineCliente = archivio.filter(item =>
@@ -1371,7 +1372,8 @@ Cosa hai fatto: ${testoLavoro}`;
               ...lavoro,
               macchinaId: item.id,
               cliente: item.ragioneSociale,
-              modello: item.modello
+              modello: item.modello,
+              noteMacchina:item.noteMacchina || ''
             });
           });
         });
@@ -1382,7 +1384,8 @@ Cosa hai fatto: ${testoLavoro}`;
               ...lavoro,
               macchinaId: item.id,
               cliente: item.ragioneSociale,
-              modello: item.modello
+              modello: item.modello,
+              noteMacchina:item.noteMacchina || ''
             });
           });
         });
@@ -1424,6 +1427,7 @@ Cosa hai fatto: ${testoLavoro}`;
                 <div class="small" style="margin-top:4px;"><strong>Ore:</strong> ${escapeHtml(lavoro.ore || '0')}</div>
                 <div style="margin-top:6px;">${escapeHtml(lavoro.descrizione)}</div>
                 <div class="small" style="margin-top:6px;">${escapeHtml(lavoro.cliente)} - ${escapeHtml(lavoro.modello)}</div>
+<div style="margin-top:10px;padding:10px;background:#f3f4f6;border-left:4px solid #38bdf8;border-radius:8px;"><strong>NOTE MACCHINA</strong><div style="margin-top:6px;line-height:1.5;">${escapeHtml(lavoro.noteMacchina||'Nessuna nota inserita')}</div></div>
 
                 <div style="margin-top:10px; display:flex; gap:18px; flex-wrap:wrap; align-items:center;">
                   <label style="display:flex; align-items:center; gap:8px; margin:0; font-weight:600;">
@@ -1831,6 +1835,9 @@ Cosa hai fatto: ${testoLavoro}`;
     }
 
     function esportaPdf(filtroTipo, titoloFiltro) {
+      try{
+      if(!window.jspdf){ alert('Libreria PDF non caricata'); return; }
+
       const { jsPDF } = window.jspdf;
       const lavori = raccogliLavori(filtroTipo);
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -1875,7 +1882,9 @@ Cosa hai fatto: ${testoLavoro}`;
 
         pdf.text(`Ore: ${lavoro.ore || '0'}`, marginLeft, y);
         y += 6;
-
+        const righeNote = pdf.splitTextToSize(`Note macchina: ${lavoro.noteMacchina || '-'}`, maxWidth);
+        pdf.text(righeNote, marginLeft, y);
+        y += righeNote.length * 5;
         const righeDescrizione = pdf.splitTextToSize(`Descrizione: ${lavoro.descrizione || '-'}`, maxWidth);
         pdf.text(righeDescrizione, marginLeft, y);
         y += righeDescrizione.length * 5;
@@ -1889,6 +1898,7 @@ Cosa hai fatto: ${testoLavoro}`;
       });
 
       pdf.save(`cpmacchine-${titoloFiltro.toLowerCase().replace(/\s+/g, '-')}.pdf`);
+      } catch(e){ console.error(e); alert('Errore PDF: '+e.message); }
     }
 
     function avviaSyncRealtime() {
